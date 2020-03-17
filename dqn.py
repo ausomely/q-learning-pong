@@ -43,19 +43,27 @@ class QLearner(nn.Module):
     
     def feature_size(self):
             return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
-    
+
+
+
+
     def act(self, state, epsilon):
         if random.random() > epsilon:
             state = Variable(torch.FloatTensor(np.float32(state)).unsqueeze(0), requires_grad=True)
             # TODO: Given state, you should write code to get the Q value and chosen action
-        
 
+            # forward the state rep screenshot into the network
+            # np.argmax
+            with torch.no_grad():
+                x = self.model.foward(state)
+                # action = np.argmax(Variable(x)).item()  # exploit
+                action = np.argmax(x.cpu().detach().numpy())
 
 
 
 
         else:
-            action = random.randrange(self.env.action_space.n)
+            action = random.randrange(self.env.action_space.n) # explore
         return action
 
     def copy_from(self, target):
@@ -72,7 +80,15 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     done = Variable(torch.FloatTensor(done))
     # implement the loss function here
 
+    x = model.foward(state).gather(1, action.view(action.size(0), 1))
+    # x = model.forward(state).gather(1, action.unsqueeze(1))
+    # x = x.squeeze(1)
+    x_plusOne = target_model.foward(next_state)
+    max_x_plusOne = model.foward(x_plusOne, 1)[0]
+    expected_x = reward + (1 - done) * gamma * max_x_plusOne
 
+
+    loss = torch.MSELoss(x, expected_x)
     
     return loss
 
@@ -89,7 +105,21 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
+        state = []
+        action = []
+        reward = []
+        next_state = []
+        done = []
 
+        batch = random.sample(self.buffer, batch_size)
+
+        for experience in batch:
+            state, action, reward, next_state, done = experience
+            state.append(state)
+            action.append(action)
+            reward.append(reward)
+            next_state.append(next_state)
+            done.append(done)
 
         return state, action, reward, next_state, done
 
