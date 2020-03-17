@@ -5,8 +5,11 @@ import torch
 import torch.nn as nn
 import torch.autograd as autograd
 import math, random
+
 USE_CUDA = torch.cuda.is_available()
-Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() if USE_CUDA else autograd.Variable(*args, **kwargs)
+Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() if USE_CUDA else autograd.Variable(*args,
+                                                                                                                **kwargs)
+
 
 class QLearner(nn.Module):
     def __init__(self, env, num_frames, batch_size, gamma, replay_buffer):
@@ -20,7 +23,6 @@ class QLearner(nn.Module):
         self.input_shape = self.env.observation_space.shape
         self.num_actions = self.env.action_space.n
 
-
         self.features = nn.Sequential(
             nn.Conv2d(self.input_shape[0], 32, kernel_size=8, stride=4),
             nn.ReLU(),
@@ -29,24 +31,21 @@ class QLearner(nn.Module):
             nn.Conv2d(64, 64, kernel_size=3, stride=1),
             nn.ReLU()
         )
-        
+
         self.fc = nn.Sequential(
             nn.Linear(self.feature_size(), 512),
             nn.ReLU(),
             nn.Linear(512, self.num_actions)
         )
-        
+
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x
-    
+
     def feature_size(self):
-            return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
-
-
-
+        return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
 
     def act(self, state, epsilon):
         if random.random() > epsilon:
@@ -57,20 +56,20 @@ class QLearner(nn.Module):
             # np.argmax
             # with torch.no_grad():
             x = self.forward(state)
-                # action = np.argmax(Variable(x)).item()  # exploit
+            # action = np.argmax(Variable(x)).item()  # exploit
             action = np.argmax(x.cpu().detach().numpy())
 
 
 
 
         else:
-            action = random.randrange(self.env.action_space.n) # explore
+            action = random.randrange(self.env.action_space.n)  # explore
         return action
 
     def copy_from(self, target):
         self.load_state_dict(target.state_dict())
 
-        
+
 def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     state, action, reward, next_state, done = replay_buffer.sample(batch_size)
 
@@ -80,19 +79,24 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     reward = Variable(torch.FloatTensor(reward))
     done = Variable(torch.FloatTensor(done))
     # implement the loss function here
-    # x = model.forward(state).gather(1, action.unsqueeze(1))
-    # x = x.squeeze(1)
-
-    x = model.forward(state).gather(1, action.view(action.size(0), 1))
-
-    x_plusOne = target_model.forward(next_state)
-    max_x_plusOne = model.forward(x_plusOne, 1)[0]
-    expected_x = reward + (1 - done) * gamma * max_x_plusOne
 
 
-    loss = torch.MSELoss(x, expected_x)
-    
+    # Source: Hands- On Reinforcement Learning for Games...
+
+    q_vals = model.forward(state)
+    q_nextVals = model.forward(next_state)
+    q_nextStateVals = target_model.forward(next_state)
+
+    q_val = q_vals.gather(1, action.unsqueeze(1)).squeeze(1)
+    q_nextVal = q_nextStateVals.gather(1, torch.max(q_nextVals, 1)[1].unsqueeze(1)).squeeze(1)
+
+
+    expected_q_val = reward + (1 - done) * gamma * q_nextVal
+
+    loss = torch.MSE_Loss(q_val, expected_q_val.detach())
+
     return loss
+
 
 
 class ReplayBuffer(object):
@@ -110,12 +114,20 @@ class ReplayBuffer(object):
         # TODO: ReplayBuffer.sample(), you just have to unpack the element in the deque
         #  Each element is holding 5 things: state, action, reward, next_state, done. And you just have to index and return accordingly
 
-        self.buffer = random.sample(batch_size)
+        # Sample buffer randomly
 
+        # Right now buffer stores each of them
+        # separate each to their respective variables
+        # separate the batch size of tuples to their respective variables also of bach size
 
+        # sample buffer randomly
+        focus_batch = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = zip(*focus_batch)
 
 
         return state, action, reward, next_state, done
+
+
 
     def __len__(self):
         return len(self.buffer)
