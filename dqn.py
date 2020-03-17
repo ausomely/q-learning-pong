@@ -20,6 +20,7 @@ class QLearner(nn.Module):
         self.input_shape = self.env.observation_space.shape
         self.num_actions = self.env.action_space.n
 
+
         self.features = nn.Sequential(
             nn.Conv2d(self.input_shape[0], 32, kernel_size=8, stride=4),
             nn.ReLU(),
@@ -54,10 +55,10 @@ class QLearner(nn.Module):
 
             # forward the state rep screenshot into the network
             # np.argmax
-            with torch.no_grad():
-                x = self.model.foward(state)
+            # with torch.no_grad():
+            x = self.forward(state)
                 # action = np.argmax(Variable(x)).item()  # exploit
-                action = np.argmax(x.cpu().detach().numpy())
+            action = np.argmax(x.cpu().detach().numpy())
 
 
 
@@ -79,12 +80,13 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     reward = Variable(torch.FloatTensor(reward))
     done = Variable(torch.FloatTensor(done))
     # implement the loss function here
-
-    x = model.foward(state).gather(1, action.view(action.size(0), 1))
     # x = model.forward(state).gather(1, action.unsqueeze(1))
     # x = x.squeeze(1)
-    x_plusOne = target_model.foward(next_state)
-    max_x_plusOne = model.foward(x_plusOne, 1)[0]
+
+    x = model.forward(state).gather(1, action.view(action.size(0), 1))
+
+    x_plusOne = target_model.forward(next_state)
+    max_x_plusOne = model.forward(x_plusOne, 1)[0]
     expected_x = reward + (1 - done) * gamma * max_x_plusOne
 
 
@@ -105,21 +107,13 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
-        state = []
-        action = []
-        reward = []
-        next_state = []
-        done = []
+        # TODO: ReplayBuffer.sample(), you just have to unpack the element in the deque
+        #  Each element is holding 5 things: state, action, reward, next_state, done. And you just have to index and return accordingly
 
-        batch = random.sample(self.buffer, batch_size)
+        self.buffer = random.sample(batch_size)
 
-        for experience in batch:
-            state, action, reward, next_state, done = experience
-            state.append(state)
-            action.append(action)
-            reward.append(reward)
-            next_state.append(next_state)
-            done.append(done)
+
+
 
         return state, action, reward, next_state, done
 
