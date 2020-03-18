@@ -54,9 +54,9 @@ class QLearner(nn.Module):
 
             # forward the state rep screenshot into the network
             # np.argmax
-            # with torch.no_grad():
+            
             x = self.forward(state)
-            # action = np.argmax(Variable(x)).item()  # exploit
+            # exploit
             action = np.argmax(x.cpu().detach().numpy())
 
 
@@ -103,7 +103,7 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
 
     expected_q_val = reward + (1 - done) * gamma * max_q
 
-    #loss = torch.nn.MSELoss(q_vals, expected_q_val.detach())
+    
     loss = (q_vals - expected_q_val.data).pow(2).mean()
     return loss
 
@@ -121,17 +121,18 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
-        # TODO: ReplayBuffer.sample(), you just have to unpack the element in the deque
-        #  Each element is holding 5 things: state, action, reward, next_state, done. And you just have to index and return accordingly
+ 
 
-        # Sample buffer randomly
+
+
 
         # Right now buffer stores each of them
         # separate each to their respective variables
         # separate the batch size of tuples to their respective variables also of bach size
 
-        # sample buffer randomly
+        # Sample buffer randomly
         focus_batch = random.sample(self.buffer, batch_size)
+        
         state, action, reward, next_state, done = zip(*focus_batch)
 
 

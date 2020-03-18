@@ -12,12 +12,13 @@ import torch.nn.functional as F
 USE_CUDA = torch.cuda.is_available()
 from dqn import QLearner, compute_td_loss, ReplayBuffer
 
+
 env_id = "PongNoFrameskip-v4"
 env = make_atari(env_id)
 env = wrap_deepmind(env)
 env = wrap_pytorch(env)
 
-num_frames = 100000
+num_frames = 1000000
 batch_size = 32
 gamma = 0.99
 record_idx = 10000
@@ -47,6 +48,9 @@ episode_reward = 0
 
 state = env.reset()
 
+# np.save('losses.npy', losses)
+# np.save('awards.npy', all_rewards)
+# torch.save(model.state_dict(), "run.pth")
 for frame_idx in range(1, num_frames + 1):
     #print("Frame: " + str(frame_idx))
 
@@ -82,5 +86,7 @@ for frame_idx in range(1, num_frames + 1):
         target_model.copy_from(model)
 
     # save to memory
-    
+
+
+
 
