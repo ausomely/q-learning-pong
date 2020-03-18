@@ -87,8 +87,8 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     q_nextVals = model.forward(next_state)
     q_nextStateVals = target_model.forward(next_state)
 
-    q_val = q_vals.gather(1, action.unsqueeze(1)).squeeze(1)
-    q_nextVal = q_nextStateVals.gather(1, torch.max(q_nextVals, 1)[1].unsqueeze(1)).squeeze(1)
+    q_val = q_vals.gather(1, action.unsqueeze(-1)).squeeze(-1)
+    q_nextVal = q_nextStateVals.gather(1, torch.max(q_nextVals, 1)[0].unsqueeze(-1)).squeeze(-1)
 
 
     expected_q_val = reward + (1 - done) * gamma * q_nextVal
