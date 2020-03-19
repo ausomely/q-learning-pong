@@ -52,6 +52,7 @@ games_won = 0
 
 while not done:
     if use_gui:
+        #__import__('time').sleep(0.1)
         env.render()
 
     action = model.act(state, 0)
