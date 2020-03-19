@@ -72,7 +72,7 @@ class QLearner(nn.Module):
 
 def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     state, action, reward, next_state, done = replay_buffer.sample(batch_size)
-
+    #fix dimensions
     state = Variable(torch.FloatTensor(np.float32(state)).squeeze(1))
     next_state = Variable(torch.FloatTensor(np.float32(next_state)).squeeze(1), requires_grad=True)
     action = Variable(torch.LongTensor(action))
@@ -80,25 +80,14 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     done = Variable(torch.FloatTensor(done))
     # implement the loss function here
 
-    action = action.view(action.size(0),1) 
-    done = done.view(done.size(0),1)
-    
-    # Source: Hands- On Reinforcement Learning for Games...
 
-    # q_vals = model.forward(state)
-    # q_nextVals = model.forward(next_state) 
-    # q_nextStateVals = target_model.forward(next_state) 
-
-    # q_val = q_vals.gather(1, action.unsqeueeze(1)).squeeze(1)) 
-    # q_nextVal = q_nextStateVals.gather(1, torch.max(q_nextVals, 1)[0].unsqueeze(1)).squeeze(1) 
     
     
-
-    q_vals = model.forward(state).gather(1, action) 
+    
+    q_vals = model.forward(state).gather(1, action.unsqueeze(-1)).squeeze(-1) 
     q_nextVals = target_model.forward(next_state)
 
     max_q = torch.max(q_nextVals, 1)[0]
-    max_q = max_q.view(max_q.size(0),1)
 
 
     expected_q_val = reward + (1 - done) * gamma * max_q
