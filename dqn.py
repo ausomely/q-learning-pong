@@ -92,7 +92,7 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
 
     expected_q_val = reward + (1 - done) * gamma * max_q
 
-    
+    #MSE is just the mean of the input - output "squared"  
     loss = (q_vals - expected_q_val.data).pow(2).mean()
     return loss
 
@@ -117,7 +117,7 @@ class ReplayBuffer(object):
 
         # Right now buffer stores each of them
         # separate each to their respective variables
-        # separate the batch size of tuples to their respective variables also of bach size
+        # separate the batch size of tuples to their respective variables
 
         # Sample buffer randomly
         focus_batch = random.sample(self.buffer, batch_size)
