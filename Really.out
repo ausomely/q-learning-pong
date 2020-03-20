@@ -1,0 +1,20 @@
+Using cuda
+#Frame: 10000, preparing replay buffer
+#Frame: 20000, Loss: 0.000530
+Last-10 average reward: -19.500000
+#Frame: 30000, Loss: 0.000401
+Last-10 average reward: -18.700000
+#Frame: 40000, Loss: 0.000341
+Last-10 average reward: -17.800000
+#Frame: 50000, Loss: 0.000309
+Last-10 average reward: -16.600000
+#Frame: 60000, Loss: 0.000374
+Last-10 average reward: -14.800000
+#Frame: 70000, Loss: 0.000380
+Last-10 average reward: -14.200000
+#Frame: 80000, Loss: 0.000376
+Last-10 average reward: -13.600000
+#Frame: 90000, Loss: 0.000371
+Last-10 average reward: -11.200000
+#Frame: 100000, Loss: 0.000366
+Last-10 average reward: -11.200000
