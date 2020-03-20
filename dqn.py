@@ -52,12 +52,11 @@ class QLearner(nn.Module):
             state = Variable(torch.FloatTensor(np.float32(state)).unsqueeze(0), requires_grad=True)
             # TODO: Given state, you should write code to get the Q value and chosen action
 
-            # forward the state rep screenshot into the network
-            # np.argmax
-            
-            x = self.forward(state)
+                       
             # exploit
-            action = np.argmax(x.cpu().detach().numpy())
+            # get max of states
+            # foward state tensor to tensor with no gradient
+            action = torch.argmax(self.forward(state).detach())
 
 
 
@@ -72,7 +71,7 @@ class QLearner(nn.Module):
 
 def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     state, action, reward, next_state, done = replay_buffer.sample(batch_size)
-    #fix dimensions
+    # Fix dimensions of state and next state
     state = Variable(torch.FloatTensor(np.float32(state)).squeeze(1))
     next_state = Variable(torch.FloatTensor(np.float32(next_state)).squeeze(1), requires_grad=True)
     action = Variable(torch.LongTensor(action))
@@ -83,17 +82,25 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
 
     
     
+    # match tensor dimesions
+    # set/foward q values and next q values
+    # get max of next q val tensors dim 1 rows
+    # lookahead steps
+    # compute MSE 
+    q_vals = model.forward(state).gather(1, action.unsqueeze(1)).squeeze(1) 
     
-    q_vals = model.forward(state).gather(1, action.unsqueeze(-1)).squeeze(-1) 
-    q_nextVals = target_model.forward(next_state)
 
+    q_nextVals = target_model.forward(next_state)
+    
+    
     max_q = torch.max(q_nextVals, 1)[0]
 
+    
+    look_ahead_q_vals = reward + (1 - done) * gamma * max_q
 
-    expected_q_val = reward + (1 - done) * gamma * max_q
-
-    #MSE is just the mean of the input - output "squared"  
-    loss = (q_vals - expected_q_val.data).pow(2).mean()
+    # MSE is just the mean of the model - target "squared"
+    # change look_ahead to tensor no gradient
+    loss = (q_vals - look_ahead_q_vals.detach()).pow(2).mean()
     return loss
 
 
@@ -117,8 +124,7 @@ class ReplayBuffer(object):
 
         # Right now buffer stores each of them
         # separate each to their respective variables
-        # separate the batch size of tuples to their respective variables
-
+       
         # Sample buffer randomly
         focus_batch = random.sample(self.buffer, batch_size)
         
