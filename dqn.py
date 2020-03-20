@@ -87,7 +87,7 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     # get max of next q val tensors dim 1 rows
     # lookahead steps
     # compute MSE 
-    q_vals = model.forward(state).gather(1, action.unsqueeze(1)).squeeze(1) 
+    q_vals = model.forward(state).gather(1, action.unsqueeze(-1)).squeeze(-1) 
     
 
     q_nextVals = target_model.forward(next_state)
@@ -95,11 +95,13 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     
     max_q = torch.max(q_nextVals, 1)[0]
 
-    
+     
     look_ahead_q_vals = reward + (1 - done) * gamma * max_q
 
     # MSE is just the mean of the model - target "squared"
     # change look_ahead to tensor no gradient
+
+   # loss = np.square(np.subtract(q_vals,look_ahead_q_vals.cpu().detach().numpy())).mean() 
     loss = (q_vals - look_ahead_q_vals.detach()).pow(2).mean()
     return loss
 

@@ -18,7 +18,7 @@ env = make_atari(env_id)
 env = wrap_deepmind(env)
 env = wrap_pytorch(env)
 
-num_frames = 150000
+num_frames = 1150000
 batch_size = 32
 gamma = 0.99
 record_idx = 10000
@@ -82,11 +82,11 @@ for frame_idx in range(1, num_frames + 1):
 
     if frame_idx % 50000 == 0:
         target_model.copy_from(model)
-        torch.save(model.state_dict(), "pleasework_1.pth")
+        torch.save(model.state_dict(), "Really.pth")
 
     # save to memory
-np.save('pleasework_loss_1.npy', losses)
-np.save('pleasework_award_1.npy', all_rewards)
-torch.save(model.state_dict(), "pleasework_1.pth") 
+np.save('Really_loss.npy', losses)
+np.save('Really_award.npy', all_rewards)
+torch.save(model.state_dict(), "Really.pth") 
 
 
