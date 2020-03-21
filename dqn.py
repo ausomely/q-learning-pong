@@ -87,7 +87,7 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     # get max of next q val tensors dim 1 rows
     # lookahead steps
     # compute MSE 
-    q_vals = model.forward(state).gather(1, action.unsqueeze(-1)).squeeze(-1) 
+    q_vals = model.forward(state).gather(1, action.unsqueeze(1)).squeeze(1) 
     
 
     q_nextVals = target_model.forward(next_state)
