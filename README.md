@@ -17,5 +17,13 @@ models. Through the implementation, I used reinforcement learning to teach a
 model how to play and win Pong. The bot was trained for over 10 hours and
 1,000,000+ game frames to maximize win rates. 
 
+## Training Results 
+
+![Training Awards](q-learning-pong\Training Awards.PNG)
+The scatter plot above shows the increase of average reward per 100k frames it was trained for. There is a positive linear increase as the model trains. 
+
+![Training Losses](q-learning-pong\Traning Losses.PNG)
+The plot above shows the training losses per 100k frames it was trained for. 
+
 
 
