@@ -1,0 +1,14 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+data = np.load('award_test-1.npy')
+
+x, y = zip(*data)
+
+plt.title("Training Awards Over 1.5^6 Frames")
+plt.xlabel("Frames")
+plt.ylabel("Loss")
+plt.scatter(x,y)
+
+plt.show()
+
