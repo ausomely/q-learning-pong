@@ -19,10 +19,10 @@ model how to play and win Pong. The bot was trained for over 10 hours and
 
 ## Training Results 
 
-![Training Awards](q-learning-pong\Training Awards.PNG)
+![Training Awards](Training_Awards.PNG)
 The scatter plot above shows the increase of average reward per 100k frames it was trained for. There is a positive linear increase as the model trains. 
 
-![Training Losses](q-learning-pong\Traning Losses.PNG)
+![Training Losses](Training_Losses.PNG)
 The plot above shows the training losses per 100k frames it was trained for. 
 
 
